@@ -20,7 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"encoding/binary"
+	//"encoding/binary"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -103,13 +103,17 @@ func (t *SimpleChaincode) moreVariables(stub shim.ChaincodeStubInterface, args [
 		if err != nil {
 			vars = 0
 			fmt.Println("variables not found. Setting new one. But in fact it should be set in init");
-			err = stub.PutState("variables", []byte(strconv.Itoa(0)));
+			ascii := []byte(strconv.Itoa(0));
+			fmt.Println(ascii)
+			err = stub.PutState("variables", ascii);
 			if err != nil {
 				return nil, err
 			}
 		}else{
-			varsint64, _ := binary.Varint(varsasbytes)
-			vars = int(varsint64)
+			s := string(varsasbytes[:])
+			vars, _ = strconv.Atoi(s)
+			//vars = int(varsint64)
+			fmt.Println("string: " + s)
 		}
 
 		vars = vars + 1;
