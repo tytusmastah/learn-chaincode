@@ -19,6 +19,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"encoding/binary"
 
 	"github.com/hyperledger/fabric/core/chaincode/shim"
 )
@@ -62,7 +64,9 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 		return t.Init(stub, "init", args)
 	} else if function == "write" {
     return t.write(stub, args)
-  }
+  } else if function == "moreVariables" {
+		return t.moreVariables(stub, args);
+	}
 	fmt.Println("invoke did not find func: " + function)					//error
 
 	return nil, errors.New("Received unknown function invocation: " + function)
@@ -85,6 +89,45 @@ func (t *SimpleChaincode) write(stub shim.ChaincodeStubInterface, args []string)
     }
     return nil, nil
 }
+
+func (t *SimpleChaincode) moreVariables(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+    var name, value string
+    var err error
+		var vars int
+		var lenargs int
+
+    fmt.Println("running moreVariables()")
+
+
+		varsasbytes, err := stub.GetState("variables")
+		if err != nil {
+			vars = 0
+			fmt.Println("variables not found. Setting new one. But in fact it should be set in init");
+			err = stub.PutState("variables", []byte(strconv.Itoa(0)));
+			if err != nil {
+				return nil, err
+			}
+		}else{
+			varsint64, _ := binary.Varint(varsasbytes)
+			vars = int(varsint64)
+		}
+
+		vars = vars + 1;
+
+		lenargs = len(args);
+		for i:=0; i+1<lenargs; i+=2 {
+			name=args[i]
+			value = args[i+1]
+			fmt.Println(name + " = " + value)
+		}
+
+    err = stub.PutState("variables", []byte(strconv.Itoa(vars)))  //write the variable into the chaincode state
+    if err != nil {
+        return nil, err
+    }
+    return nil, nil
+}
+
 
 // Query is our entry point for queries
 func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function string, args []string) ([]byte, error) {
