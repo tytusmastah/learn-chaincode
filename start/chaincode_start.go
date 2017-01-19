@@ -113,6 +113,7 @@ func (t *SimpleChaincode) moreVariables(stub shim.ChaincodeStubInterface, args [
 		}
 
 		vars = vars + 1;
+		fmt.Println("invokes of this fucntion: " + string(vars))
 
 		lenargs = len(args);
 		for i:=0; i+1<lenargs; i+=2 {
