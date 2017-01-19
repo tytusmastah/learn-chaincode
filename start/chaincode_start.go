@@ -126,7 +126,7 @@ func (t *SimpleChaincode) moreVariables(stub shim.ChaincodeStubInterface, args [
     if err != nil {
         return nil, err
     }
-    return nil, nil
+    return []byte(strconv.Itoa(vars)), nil
 }
 
 
